@@ -1,0 +1,8 @@
+altgraph==0.17.2
+docx2txt==0.8
+lxml==4.8.0
+macholib==1.16
+pyinstaller==5.0.1
+pyinstaller-hooks-contrib==2022.4
+python-docx==0.8.11
+PyYAML==6.0
