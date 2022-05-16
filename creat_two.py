@@ -40,7 +40,7 @@ def get_daan(file_name):
                 three_index = text.text
             else:
                 if one_index and three_index:
-                    data = re.split(r"(（[\d]）)", text.text)
+                    data = re.split(r"(（\d{0,9}）|\d{0,9}\．)", text.text)
                     if not data[0]:
                         data = data[1:]
                         key_biaoti = data[::2]
@@ -66,15 +66,16 @@ def new_docx(file_name):
     for text in document.paragraphs:
         if text.text:
             if book_index - 1 > 0 and local_index != book_index:
-                if re.findall("（[\d]）|\d\．", text.text) or re.match(config_data['big_title'], text.text) or re.match(config_data['填空题']['biaotiguanjianzi'], text.text) or re.match(config_data['简答题']['biaotiguanjianzi'], text.text) or re.match(config_data['判断题']['biaotiguanjianzi'], text.text) or re.match(config_data['多项选择题']['biaotiguanjianzi'], text.text) or re.match(config_data['单项选择题']['biaotiguanjianzi'], text.text):
+                if re.findall("（\d{0,9}）|\d{0,9}\．", text.text) or re.match(config_data['big_title'], text.text) or re.match(config_data['填空题']['biaotiguanjianzi'], text.text) or re.match(config_data['简答题']['biaotiguanjianzi'], text.text) or re.match(config_data['判断题']['biaotiguanjianzi'], text.text) or re.match(config_data['多项选择题']['biaotiguanjianzi'], text.text) or re.match(config_data['单项选择题']['biaotiguanjianzi'], text.text):
                     key_name = f"{one_text}_{three_text}_{f'（{book_index - 1}）'}"
                     two_key = f"{one_text}_{three_text}_{f'{book_index - 1}．'}"
                     ddd = da_data.get(key_name) or da_data.get(two_key) or [""]
-                    text.insert_paragraph_before(text=f'【答案】：{ddd[0]}')
+                    text.insert_paragraph_before(text=f'【答案】{ddd[0]}')
                     for index in ddd[1:]:
                         text.insert_paragraph_before(text=index)
-                    text.insert_paragraph_before(text='【解析】：')
-                    text.insert_paragraph_before(text=f'【标签】：{book_tag}')
+                    text.insert_paragraph_before(text='【解析】')
+                    tag = re.sub(r"[一二三四五六七八九十\d．、]", "", three_text)
+                    text.insert_paragraph_before(text=f'【标签】{tag}')
                     local_index = book_index
 
             if re.match(config_data['big_title'], text.text):
@@ -139,7 +140,7 @@ def new_docx(file_name):
                         p.add_run(new_content)
                         book_index += 1
 
-            if book_tag and re.findall("（[\d]）|\d\．", text.text) and "1" in re.findall("（[\d]）|\d\．", text.text)[0]:
+            if book_tag and re.findall("（\d{0,9}）|\d{0,9}\．", text.text) and "1" in re.findall("（\d{0,9}）|\d{0,9}\．", text.text)[0]:
                 text.insert_paragraph_before(text=config_data[book_tag]['shuoming'])
 
     document.save(f'new_docx/{file_name}')
@@ -149,4 +150,5 @@ from pathlib import Path
 
 old_docx_path = Path("old_docx")
 for file in old_docx_path.glob('**/*.docx'):
+    print(file.name)
     new_docx(file.name)

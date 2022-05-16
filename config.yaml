@@ -1,11 +1,11 @@
 big_title: '项目[一二三四五六七八九十\d+]|第[一二三四五六七八九十\d+]章'
 单项选择题:
     shuoming: 【说明】每小题备选答案中，只有一个符合题意的正确答案。
-    biaotiguanjianzi: '[一二三四五六七八九十\d].*单项选择题$'
+    biaotiguanjianzi: '[一二三四五六七八九十\d].*选择题$'
     tihaoguanjianzi: '（[\d]）|\d\．'
 多项选择题:
     shuoming: 【说明】每小题备选答案中有多个正确选项，需从中选择2～4个符合题意的选项作为答案。
-    biaotiguanjianzi: '[一二三四五六七八九十\d].*选择题$'
+    biaotiguanjianzi: '[一二三四五六七八九十\d].*多项选择题$'
     tihaoguanjianzi: '（[\d]）|\d\．'
 判断题:
     shuoming: 【说明】判断下列各项叙述是否正确。
@@ -17,9 +17,5 @@ big_title: '项目[一二三四五六七八九十\d+]|第[一二三四五六七�
     tihaoguanjianzi: '（[\d]）|\d\．'
 简答题:
     shuoming: 【说明】根据相关要求，完成下列题目。
-    biaotiguanjianzi: '[一二三四五六七八九十\d].*简答题$|[一二三四五六七八九十\d].*编程题$'
-    tihaoguanjianzi: '（[\d]）|\d\．'
-操作题:
-    shuoming: 【说明】根据相关要求，完成下列题目。
-    biaotiguanjianzi: '[一二三四五六七八九十\d].*操作题$'
+    biaotiguanjianzi: '[一二三四五六七八九十\d].*简答题$|[一二三四五六七八九十\d].*编程题$｜[一二三四五六七八九十\d].*操作题$[一二三四五六七八九十\d].*实践题$'
     tihaoguanjianzi: '（[\d]）|\d\．'
