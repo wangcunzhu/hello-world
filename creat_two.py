@@ -14,23 +14,23 @@ with open("config.yaml", 'r', encoding='utf-8') as yamlFile:
 
 
 def find_index(content: str, tag):
-    if re.findall("^（\d{0,9}）|^\d{0,9}．", content):
-        a = re.findall('^（\d{0,9}）|^\d{0,9}．', content)[0]
-        b = re.split('^（\d{0,9}）|^\d{0,9}．', content)[1]
+    if re.findall("^（(\d{0,9})）|^(\d{0,9})[．]", content) and any(re.findall("^（(\d{0,9})）|^(\d{0,9})[．]", content)[0]):
+        a = re.findall("^（(\d{0,9})）|^(\d{0,9})[．]", content)[0][0] or re.findall("^（(\d{0,9})）|^(\d{0,9})[．]", content)[0][1]
+        # print(re.split(r"([/(（])?(\d+)([\)）\.．])", content))
+        b = re.split(r"([/(（])?(\d+)([\)）．])", content)[4]
         return f"{a}【{tag}】{b}"
     else:
-        print(f"无法识别{content}首位")
+        return content
 
 def add_tag(text, da_data, one_text, three_text, a):
-    key_name = f"{one_text}_{three_text}_{f'（{a}）'}"
-    two_key = f"{one_text}_{three_text}_{f'{a}．'}"
-    ddd = da_data.get(key_name) or da_data.get(two_key) or [""]
+    key_name = f"{one_text}_{three_text}_{a}"
+    ddd = da_data.get(key_name) or [""]
     text.insert_paragraph_before(text=f'【答案】{ddd[0]}')
     for index in ddd[1:]:
         text.insert_paragraph_before(text=index)
     text.insert_paragraph_before(text='【解析】')
-    tag = re.sub(r"[一二三四五六七八九十\d．、]", "", three_text)
-    text.insert_paragraph_before(text=f'【标签】{tag}')
+    # tag = re.sub(r"[一二三四五六七八九十\d．、]", "", three_text)
+    # text.insert_paragraph_before(text=f'【标签】{tag}')
 
 
 def get_daan(file_name):
@@ -51,16 +51,16 @@ def get_daan(file_name):
                 three_index = text.text
             else:
                 if one_index and three_index:
-                    data = re.split(r"(（\d{0,9}）|\d{0,9}\．)", text.text)
+                    data = re.split(r"([（])?(\d+)([）．])", text.text)
                     if not data[0]:
-                        data = data[1:]
-                        key_biaoti = data[::2]
-                        key_text = data[1::2]
+                        data = data[2:]
+                        key_biaoti = data[::4]
+                        key_text = data[2::4]
                         for key, value in zip(key_biaoti, key_text):
                             key_name = f"{one_index}_{three_index}_{key}"
                             da_data.setdefault(key_name, []).append(value)
                     else:
-                        da_data.setdefault(key_name, []).extend(data)
+                        da_data.setdefault(key_name, []).append(text.text)
     return da_data
 
 
@@ -77,8 +77,8 @@ def new_docx(file_name):
     for index, text in enumerate(document.paragraphs):
         if text.text:
 
-            if book_tag and re.findall("^（\d{0,9}）|^\d{0,9}．", text.text):
-                a = re.findall("^（(\d{0,9})）|^(\d{0,9})．", text.text)[0][0] or re.findall("^（(\d{0,9})）|^(\d{0,9})．", text.text)[0][1]
+            if book_tag and re.findall("^（\d{0,9}）|^(\d{0,9})[．]", text.text):
+                a = re.findall("^（(\d{0,9})）|^(\d{0,9})[．]", text.text)[0][0] or re.findall("^（(\d{0,9})）|^(\d{0,9})[．]", text.text)[0][1]
                 if a == "1":
                     text.insert_paragraph_before(text=config_data[book_tag]['shuoming'])
                 else:
@@ -86,7 +86,8 @@ def new_docx(file_name):
                         add_tag(text, da_data, one_text, three_text, int(a)-1)
                         before_a = int(a)
                     else:
-                        print("最后1题")
+                        # print("最后1题")
+                        pass
 
             if re.match(config_data['big_title'], text.text):
                 if before_a > 1:
@@ -145,20 +146,16 @@ def new_docx(file_name):
                 three_text = content
 
             elif book_tag == "填空题":
-                content = re.sub("_+|\s+", "（ ）", text.text)
-                if content:
-                    new_content = find_index(content,  "填空题")
-                    if new_content:
-                        p = text.clear()
-                        p.add_run(new_content)
+                content = re.sub("_+|\s+", "（）", text.text)
+                new_content = find_index(content,  "填空题")
+                p = text.clear()
+                p.add_run(new_content)
 
             elif book_tag in ["简答题", "判断题", "多项选择题", "单项选择题"]:
                 content = text.text
-                if content:
-                    new_content = find_index(content, book_tag)
-                    if new_content:
-                        p = text.clear()
-                        p.add_run(new_content)
+                new_content = find_index(content, book_tag)
+                p = text.clear()
+                p.add_run(new_content)
 
 
     document.save(f'new_docx/{file_name}')
@@ -168,5 +165,5 @@ from pathlib import Path
 
 old_docx_path = Path("old_docx")
 for file in old_docx_path.glob('**/*.docx'):
-    print(file.name)
+    print(f"当前执行的文件为=={file.name}, 文件报错的话，查看答案和源文件有什么不一致活着跳过当前文件")
     new_docx(file.name)
